@@ -1,0 +1,172 @@
+<!DOCTYPE html>  <html lang="pt-BR">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Dojo Shop • Blox Fruits</title>  
+<style>  
+*{box-sizing:border-box;margin:0;padding:0}  
+:root{--bg:#07070a;--card:#101016;--muted:#a6a6b3;--white:#f7f7fb;--line:#26212f}  
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(circle at 50% -10%,#24102d 0,#0c0910 30%,#07070a 62%);color:var(--white);min-height:100vh}  
+a{text-decoration:none;color:inherit}  
+.container{width:min(1100px,92%);margin:auto}  
+header{padding:22px 0;border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;background:rgba(7,7,10,.82);backdrop-filter:blur(14px);z-index:10}  
+.nav{display:flex;align-items:center;justify-content:space-between;gap:20px}  
+.logo{font-weight:900;font-size:22px;letter-spacing:-.8px}  
+.logo span{background:linear-gradient(90deg,#9b4dff,#ff4fd8);-webkit-background-clip:text;color:transparent}  
+.navlinks{display:flex;gap:22px;color:#c5c3cc;font-size:14px}  
+.navlinks a:hover{color:white}  
+.hero{padding:90px 0 65px;text-align:center}  
+.badge{display:inline-block;padding:8px 13px;border:1px solid #402153;background:#160d1c;border-radius:999px;color:#d9a7ff;font-size:12px;margin-bottom:20px}  
+h1{font-size:clamp(42px,7vw,76px);line-height:.98;letter-spacing:-3px}  
+.gradient{background:linear-gradient(100deg,#9b4dff,#ff4fd8);-webkit-background-clip:text;color:transparent}  
+.hero p{max-width:620px;margin:22px auto 0;color:var(--muted);font-size:17px;line-height:1.6}  
+.actions{display:flex;justify-content:center;gap:12px;margin-top:30px;flex-wrap:wrap}  
+.btn{border:1px solid var(--line);background:#121218;color:white;padding:13px 20px;border-radius:12px;font-weight:700;cursor:pointer;transition:.2s}  
+.btn:hover{transform:translateY(-2px);border-color:#8d43dc}  
+.btn.primary{border:0;background:linear-gradient(100deg,#8e43f7,#ff4fd8);box-shadow:0 8px 30px #a33cff25}  
+section{padding:55px 0}  
+.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:22px}  
+.section-head h2{font-size:30px;letter-spacing:-1px}  
+.section-head p{color:var(--muted);font-size:14px}  
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}  
+.card{background:linear-gradient(145deg,#111117,#0d0d12);border:1px solid var(--line);border-radius:20px;padding:24px;position:relative;overflow:hidden}  
+.card:before{content:"";position:absolute;width:150px;height:150px;background:linear-gradient(135deg,#a946ff55,#ff4fd833);filter:blur(45px);right:-60px;top:-60px}  
+.icon{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#8e43f7,#ff4fd8);font-size:27px;box-shadow:0 10px 30px #9b4dff25;margin-bottom:22px}  
+.card h3{font-size:22px;margin-bottom:7px}  
+.card .desc{color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:20px}  
+.price{font-size:27px;font-weight:900;margin-bottom:18px}  
+.buy{width:100%;padding:13px;border:0;border-radius:12px;color:white;font-weight:800;cursor:pointer;background:linear-gradient(100deg,#8e43f7,#ff4fd8)}  
+.support{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}  
+.support-box{padding:28px;border:1px solid var(--line);border-radius:20px;background:#0d0d12}  
+.support-box h3{font-size:22px;margin-bottom:10px}  
+.support-box p{color:var(--muted);line-height:1.6;font-size:14px}  
+footer{border-top:1px solid rgba(255,255,255,.06);padding:30px 0;color:#777783;font-size:13px;text-align:center}  
+.modal{position:fixed;inset:0;background:#0009;display:none;place-items:center;padding:20px;z-index:30}  
+.modal.show{display:grid}  
+.modal-box{width:min(500px,100%);background:#101016;border:1px solid #30263a;border-radius:20px;padding:25px;box-shadow:0 30px 100px #000}  
+.modal-box h2{margin-bottom:8px}.modal-box p{color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:18px}  
+label{display:block;font-size:13px;color:#c8c6cf;margin:13px 0 7px}  
+input,textarea{width:100%;background:#09090d;color:white;border:1px solid #29252f;border-radius:10px;padding:12px;outline:none;font:inherit}  
+textarea{min-height:90px;resize:vertical}  
+input:focus,textarea:focus{border-color:#a34cff}  
+.modal-actions{display:flex;gap:10px;margin-top:18px}  
+.modal-actions .btn{flex:1}  
+@media(max-width:700px){.navlinks{display:none}.grid,.support{grid-template-columns:1fr}.hero{padding-top:65px}h1{letter-spacing:-2px}}  
+</style>  
+</head>  
+<body>  
+<header>  
+<div class="container nav">  
+<div class="logo">DOJO <span>SHOP</span></div>  
+<nav class="navlinks"><a href="#catalogo">Catálogo</a><a href="#suporte">Suporte</a></nav>  
+</div>  
+</header>  <main>  
+<section class="hero">  
+<div class="container">  
+<div class="badge">⚡ Loja de presentes • Blox Fruits</div>  
+<h1>Seu próximo <span class="gradient">Perm</span><br>começa aqui.</h1>  
+<p>Catálogo simples, atendimento humano e uma experiência sem aquela sensação de falar com um robô de atendimento.</p>  
+<div class="actions"><a class="btn primary" href="#catalogo">Ver catálogo</a><a class="btn" href="#suporte">Falar com suporte</a></div>  
+</div>  
+</section>  <section id="catalogo">  
+<div class="container">  
+<div class="section-head"><div><h2>Catálogo</h2><p>Itens disponíveis no momento.</p></div></div>  
+<div class="grid">  
+<article class="card">  
+<div class="icon">🔥</div><h3>Flame Perm</h3><p class="desc">Fruta permanente Flame para sua conta.</p>  
+<div class="price">R$ 31,00</div><button class="buy" onclick="openOrder('Flame Perm','R$ 31,00')">Comprar</button>  
+</article>  
+<article class="card">  
+<div class="icon">❄️</div><h3>Ice Perm</h3><p class="desc">Fruta permanente Ice para sua conta.</p>  
+<div class="price">R$ 42,00</div><button class="buy" onclick="openOrder('Ice Perm','R$ 42,00')">Comprar</button>  
+</article>  
+</div>  
+</div>  
+</section>  <section id="suporte">  
+<div class="container">  
+<div class="section-head"><div><h2>Suporte humanizado</h2><p>Precisou de ajuda? Fale com uma pessoa.</p></div></div>  
+<div class="support">  
+<div class="support-box"><h3>💬 Atendimento</h3><p>Chame nossa equipe para tirar dúvidas sobre pedidos, produtos ou qualquer problema. O objetivo é resolver, não mandar você conversar com 47 menus.</p><div class="actions" style="justify-content:flex-start"><a class="btn primary" href="https://discord.com/" target="_blank">Abrir Discord</a></div></div>  
+<div class="support-box"><h3>🛡️ Antes de comprar</h3><p>Confira o produto e o preço antes de enviar o pedido. O atendimento pode confirmar os detalhes e orientar você durante o processo.</p></div>  
+</div>  
+</div>  
+</section>  
+</main>  <footer>© 2026 Dojo Shop • Site inicial</footer>  <div class="modal" id="modal">  
+<div class="modal-box">  
+<h2>Fazer pedido</h2>  
+<p id="selected"></p>  
+<label>Seu ID no Discord</label><input id="discord" placeholder="ex.: 1226222543342669855">  
+<label>Seu usuário no Roblox</label><input id="roblox" placeholder="ex.: davyluccas05">  
+<label>Observação (opcional)</label><textarea id="note" placeholder="Alguma informação para o atendimento?"></textarea>  
+<div class="modal-actions"><button class="btn" onclick="closeOrder()">Cancelar</button><button class="btn primary" onclick="sendOrder()">Enviar pedido</button></div>  
+</div>  
+</div>  <script>  
+let product = '';  
+let price = '';  
+  
+function openOrder(p, pr) {  
+    product = p;  
+    price = pr;  
+  
+    document.getElementById('selected').textContent =  
+        `Produto: ${p} • ${pr}`;  
+  
+    document.getElementById('modal').classList.add('show');  
+}  
+  
+function closeOrder() {  
+    document.getElementById('modal').classList.remove('show');  
+}  
+  
+async function sendOrder() {  
+    const discord = document.getElementById('discord').value.trim();  
+    const roblox = document.getElementById('roblox').value.trim();  
+    const observacao = document.getElementById('note').value.trim();  
+  
+    if (!discord || !roblox) {  
+        alert('Preencha seu Discord e usuário do Roblox.');  
+        return;  
+    }  
+  
+    try {  
+        const resposta = await fetch('/pedido', {  
+            method: 'POST',  
+            headers: {  
+                'Content-Type': 'application/json'  
+            },  
+            body: JSON.stringify({  
+                produto: product,  
+                discord: discord,  
+                roblox: roblox,  
+                observacao: observacao  
+            })  
+        });  
+  
+        const dados = await resposta.json();  
+  
+        if (!dados.sucesso) {  
+            alert(`❌ ${dados.mensagem}`);  
+            return;  
+        }  
+  
+        closeOrder();  
+  
+        alert(  
+            `✅ Pedido #${dados.pedido} enviado com sucesso!`  
+        );  
+  
+        // Limpa os campos depois do pedido  
+        document.getElementById('discord').value = '';  
+        document.getElementById('roblox').value = '';  
+        document.getElementById('note').value = '';  
+  
+    } catch (erro) {  
+        console.error('Erro:', erro);  
+  
+        alert(  
+            '❌ Não foi possível enviar o pedido. Tente novamente.'  
+        );  
+    }  
+}  
+          </script>  </body>  
+</html>  
