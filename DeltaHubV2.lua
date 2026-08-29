@@ -1,547 +1,680 @@
--- [[ Delta Hub [Ultimate Edition] ]] --
--- Executor Compatibility: Delta, Fluxus, Codex, etc.
+-- DELTA HUB - INTERFACE NATIVA PRETA (ULTIMATE EDITION)
+-- TUDO MANTIDO + ABA GRÁFICOS (TELA ESTICADA, REDUZIR LAG), WALL HOP REAL & 5 NOVAS FUNÇÕES
 
 local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
-local Lighting = game:GetService("Lighting")
+local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 local VirtualUser = game:GetService("VirtualUser")
-local TeleportService = game:GetService("TeleportService")
+local Lighting = game:GetService("Lighting")
 
-local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
+-- GUI Principal
+local gui = Instance.new("ScreenGui")
+gui.Name = "DeltaHubNativeGui"
+gui.ResetOnSpawn = false
 
--- ScreenGui Setup
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DeltaHubUI"
-ScreenGui.ResetOnSpawn = false
 pcall(function()
-    ScreenGui.Parent = CoreGui
+    gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 end)
-if not ScreenGui.Parent then
-    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-end
 
--- Variables / Toggles State
-local States = {
-    EspPlayer = false,
-    EspNameDist = false,
-    EspTracers = false,
-    EspColor = Color3.fromRGB(255, 0, 0),
-    Hitbox = false,
-    Fullbright = false,
-    Fly = false,
-    InfJump = false,
-    WallHop = false,
-    NoClip = false,
-    AutoClicker = false,
-    AntiAFK = false,
-    Spectate = false,
-    LavaImmunity = false,
-    StrechedRes = false
-}
-
-local Connections = {}
-local TargetPlayer = nil
-
--- Utility Functions
-local function CreateCorner(parent, radius)
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, radius or 6)
-    corner.Parent = parent
-    return corner
-end
-
-local function MakeDraggable(gui)
-    local dragging, dragInput, dragStart, startPos
-    gui.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = gui.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then dragging = false end
-            end)
-        end
-    end)
-    gui.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-end
-
--- UI Framing
-local MainFrame = Instance.new("Frame", ScreenGui)
+-- Janela Principal (Preta)
+local MainFrame = Instance.new("Frame", gui)
+MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 450, 0, 330)
-MainFrame.Position = UDim2.new(0.5, -225, 0.5, -165)
+MainFrame.Position = UDim2.new(0.5, -225, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 MainFrame.BorderSizePixel = 1
-MainFrame.BorderColor3 = Color3.fromRGB(40, 40, 40)
-CreateCorner(MainFrame, 8)
-MakeDraggable(MainFrame)
+MainFrame.BorderColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.Active = true
+MainFrame.Draggable = true
 
+-- Barra Superior de Título
 local TopBar = Instance.new("Frame", MainFrame)
-TopBar.Size = UDim2.new(1, 0, 0, 30)
-TopBar.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-CreateCorner(TopBar, 8)
+TopBar.Size = UDim2.new(1, 0, 0, 35)
+TopBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TopBar.BorderSizePixel = 0
 
-local Title = Instance.new("TextLabel", TopBar)
-Title.Size = UDim2.new(1, -35, 1, 0)
-Title.Position = UDim2.new(0, 10, 0, 0)
-Title.Text = "Delta Hub [Ultimate Edition]"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 14
+local TitleLabel = Instance.new("TextLabel", TopBar)
+TitleLabel.Size = UDim2.new(1, -40, 1, 0)
+TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+TitleLabel.Text = "Delta Hub [Ultimate Edition]"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.TextSize = 16
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.BackgroundTransparency = 1
 
+-- Botão Flutuante (Minimizado)
+local MiniBtn = Instance.new("TextButton", gui)
+MiniBtn.Name = "DeltaMiniBtn"
+MiniBtn.Size = UDim2.new(0, 130, 0, 35)
+MiniBtn.Position = UDim2.new(0.5, -65, 0, 10)
+MiniBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MiniBtn.BorderColor3 = Color3.fromRGB(40, 40, 40)
+MiniBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MiniBtn.Text = "Delta Hub 🔻"
+MiniBtn.Font = Enum.Font.SourceSansBold
+MiniBtn.TextSize = 14
+MiniBtn.Visible = false
+MiniBtn.Active = true
+MiniBtn.Draggable = true
+
+-- Botão X (Fechar / Minimizar)
 local CloseBtn = Instance.new("TextButton", TopBar)
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -30, 0, 0)
+CloseBtn.Size = UDim2.new(0, 35, 1, 0)
+CloseBtn.Position = UDim2.new(1, -35, 0, 0)
 CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-CloseBtn.BackgroundTransparency = 1
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 CloseBtn.Font = Enum.Font.SourceSansBold
-CloseBtn.TextSize = 16
-
-local FloatBtn = Instance.new("TextButton", ScreenGui)
-FloatBtn.Size = UDim2.new(0, 110, 0, 30)
-FloatBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
-FloatBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-FloatBtn.Text = "Delta Hub 🔻"
-FloatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FloatBtn.Visible = false
-FloatBtn.Font = Enum.Font.SourceSansBold
-FloatBtn.TextSize = 14
-CreateCorner(FloatBtn, 6)
-MakeDraggable(FloatBtn)
+CloseBtn.BorderSizePixel = 0
 
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
-    FloatBtn.Visible = true
+    MiniBtn.Visible = true
 end)
 
-FloatBtn.MouseButton1Click:Connect(function()
+MiniBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = true
-    FloatBtn.Visible = false
+    MiniBtn.Visible = false
 end)
 
--- Sidebar and Container
+-- Barra Lateral de Abas
 local Sidebar = Instance.new("Frame", MainFrame)
-Sidebar.Size = UDim2.new(0, 110, 1, -30)
-Sidebar.Position = UDim2.new(0, 0, 0, 30)
+Sidebar.Size = UDim2.new(0, 110, 1, -35)
+Sidebar.Position = UDim2.new(0, 0, 0, 35)
 Sidebar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-CreateCorner(Sidebar, 0)
+Sidebar.BorderSizePixel = 0
 
-local Container = Instance.new("Frame", MainFrame)
-Container.Size = UDim2.new(1, -115, 1, -35)
-Container.Position = UDim2.new(0, 112, 0, 32)
-Container.BackgroundTransparency = 1
+-- Container de Conteúdo
+local ContentArea = Instance.new("Frame", MainFrame)
+ContentArea.Size = UDim2.new(1, -110, 1, -35)
+ContentArea.Position = UDim2.new(0, 110, 0, 35)
+ContentArea.BackgroundTransparency = 1
 
-local Tabs = {}
-local TabButtons = {}
+local tabs = {}
 
-local function CreateTab(name)
-    local Button = Instance.new("TextButton", Sidebar)
-    Button.Size = UDim2.new(1, -10, 0, 25)
-    Button.Position = UDim2.new(0, 5, 0, #TabButtons * 28 + 5)
-    Button.Text = name
-    Button.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    Button.TextColor3 = Color3.fromRGB(200, 200, 200)
-    Button.Font = Enum.Font.SourceSans
-    Button.TextSize = 12
-    CreateCorner(Button, 4)
+local function createTab(name)
+    local tabContainer = Instance.new("ScrollingFrame", ContentArea)
+    tabContainer.Size = UDim2.new(1, -10, 1, -10)
+    tabContainer.Position = UDim2.new(0, 5, 0, 5)
+    tabContainer.BackgroundTransparency = 1
+    tabContainer.ScrollBarThickness = 4
+    tabContainer.ScrollBarImageColor3 = Color3.fromRGB(60, 60, 60)
+    tabContainer.Visible = false
+    
+    local layout = Instance.new("UIListLayout", tabContainer)
+    layout.Padding = UDim.new(0, 5)
+    
+    local tabBtn = Instance.new("TextButton", Sidebar)
+    tabBtn.Size = UDim2.new(1, 0, 0, 35)
+    tabBtn.Position = UDim2.new(0, 0, 0, #tabs * 35)
+    tabBtn.Text = name
+    tabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    tabBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    tabBtn.BorderSizePixel = 0
+    tabBtn.Font = Enum.Font.SourceSans
+    tabBtn.TextSize = 14
 
-    local Page = Instance.new("ScrollingFrame", Container)
-    Page.Size = UDim2.new(1, 0, 1, 0)
-    Page.BackgroundTransparency = 1
-    Page.Visible = false
-    Page.ScrollBarThickness = 3
-    Page.CanvasSize = UDim2.new(0, 0, 2, 0)
-
-    local UIList = Instance.new("UIListLayout", Page)
-    UIList.SortOrder = Enum.SortOrder.LayoutOrder
-    UIList.Padding = UDim.new(0, 5)
-
-    Button.MouseButton1Click:Connect(function()
-        for _, b in pairs(TabButtons) do b.BackgroundColor3 = Color3.fromRGB(25, 25, 25) end
-        for _, p in pairs(Tabs) do p.Visible = false end
-        Button.BackgroundColor3 = Color3.fromRGB(50, 50, 200)
-        Page.Visible = true
+    tabBtn.MouseButton1Click:Connect(function()
+        for _, t in pairs(tabs) do
+            t.container.Visible = false
+            t.btn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+            t.btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+        end
+        tabContainer.Visible = true
+        tabBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end)
 
-    table.insert(TabButtons, Button)
-    table.insert(Tabs, Page)
-
-    if #TabButtons == 1 then
-        Button.BackgroundColor3 = Color3.fromRGB(50, 50, 200)
-        Page.Visible = true
+    table.insert(tabs, {container = tabContainer, btn = tabBtn})
+    
+    if #tabs == 1 then
+        tabContainer.Visible = true
+        tabBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end
-
-    return Page
+    
+    return tabContainer
 end
 
--- UI Helper Components
-local function AddToggle(parent, text, default, callback)
-    local Frame = Instance.new("Frame", parent)
-    Frame.Size = UDim2.new(1, -10, 0, 25)
-    Frame.BackgroundTransparency = 1
+local function addBtn(parent, text, callback)
+    local btn = Instance.new("TextButton", parent)
+    btn.Size = UDim2.new(1, -10, 0, 32)
+    btn.Text = text
+    btn.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+    btn.BorderColor3 = Color3.fromRGB(45, 45, 45)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.SourceSans
+    btn.TextSize = 14
+    btn.MouseButton1Click:Connect(callback)
+    return btn
+end
 
-    local Btn = Instance.new("TextButton", Frame)
-    Btn.Size = UDim2.new(1, 0, 1, 0)
-    Btn.BackgroundColor3 = default and Color3.fromRGB(40, 150, 40) or Color3.fromRGB(30, 30, 30)
-    Btn.Text = text .. (default and " [ON]" or " [OFF]")
-    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Btn.Font = Enum.Font.SourceSans
-    Btn.TextSize = 12
-    CreateCorner(Btn, 4)
+local function addInput(parent, placeholder, callback)
+    local input = Instance.new("TextBox", parent)
+    input.Size = UDim2.new(1, -10, 0, 32)
+    input.PlaceholderText = placeholder
+    input.Text = ""
+    input.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+    input.BorderColor3 = Color3.fromRGB(40, 40, 40)
+    input.TextColor3 = Color3.fromRGB(255, 255, 255)
+    input.Font = Enum.Font.SourceSans
+    input.TextSize = 14
+    input.FocusLost:Connect(function()
+        callback(input.Text)
+    end)
+    return input
+end
 
-    local state = default
-    Btn.MouseButton1Click:Connect(function()
-        state = not state
-        Btn.BackgroundColor3 = state and Color3.fromRGB(40, 150, 40) or Color3.fromRGB(30, 30, 30)
-        Btn.Text = text .. (state and " [ON]" or " [OFF]")
-        callback(state)
+local function addLabel(parent, text)
+    local lbl = Instance.new("TextLabel", parent)
+    lbl.Size = UDim2.new(1, -10, 0, 25)
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(200, 200, 200)
+    lbl.BackgroundTransparency = 1
+    lbl.Font = Enum.Font.SourceSansBold
+    lbl.TextSize = 14
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    return lbl
+end
+
+-- ========================================================
+-- ABA 1: VISUAL (ESP, CORES & FOV)
+-- ========================================================
+local visualTab = createTab("Visual")
+
+local espActive = false
+local espNamesActive = false
+local selectedESPColor = Color3.fromRGB(255, 0, 0)
+
+addBtn(visualTab, "Toggle ESP Player", function()
+    espActive = not espActive
+    if not espActive then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("ESPHighlight") then
+                p.Character.ESPHighlight:Destroy()
+            end
+        end
+    end
+end)
+
+addBtn(visualTab, "Toggle ESP Nome + Distância", function()
+    espNamesActive = not espNamesActive
+    if not espNamesActive then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("Head") and p.Character.Head:FindFirstChild("ESPNameTag") then
+                p.Character.Head.ESPNameTag:Destroy()
+            end
+        end
+    end
+end)
+
+local tracersActive = false
+addBtn(visualTab, "Toggle ESP Tracers (Linhas)", function()
+    tracersActive = not tracersActive
+    if not tracersActive then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("TracerLine") then
+                p.Character.TracerLine:Destroy()
+            end
+        end
+    end
+end)
+
+addLabel(visualTab, "🎨 Escolher Cor do ESP:")
+
+local function createColorBtn(parent, text, color)
+    return addBtn(parent, text, function()
+        selectedESPColor = color
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("ESPHighlight") then
+                p.Character.ESPHighlight.FillColor = selectedESPColor
+            end
+        end
     end)
 end
 
-local function AddInput(parent, placeholder, callback)
-    local Box = Instance.new("TextBox", parent)
-    Box.Size = UDim2.new(1, -10, 0, 25)
-    Box.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    Box.PlaceholderText = placeholder
-    Box.Text = ""
-    Box.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Box.Font = Enum.Font.SourceSans
-    Box.TextSize = 12
-    CreateCorner(Box, 4)
-    Box.FocusLost:Connect(function(enter)
-        if enter then callback(Box.Text) end
-    end)
-end
+createColorBtn(visualTab, "🔴 Vermelho", Color3.fromRGB(255, 0, 0))
+createColorBtn(visualTab, "🔵 Azul", Color3.fromRGB(0, 120, 255))
+createColorBtn(visualTab, "🟡 Amarelo", Color3.fromRGB(255, 220, 0))
+createColorBtn(visualTab, "🟢 Verde", Color3.fromRGB(0, 255, 100))
 
-local function AddButton(parent, text, callback)
-    local Btn = Instance.new("TextButton", parent)
-    Btn.Size = UDim2.new(1, -10, 0, 25)
-    Btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    Btn.Text = text
-    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Btn.Font = Enum.Font.SourceSans
-    Btn.TextSize = 12
-    CreateCorner(Btn, 4)
-    Btn.MouseButton1Click:Connect(callback)
-end
-
--- ABAS
-local TabVisual = CreateTab("Visual")
-local TabMusic = CreateTab("Músicas")
-local TabMove = CreateTab("Movimentação")
-local TabGraphics = CreateTab("Gráficos")
-local TabSkin = CreateTab("Skin")
-local TabUtils = CreateTab("Farm / Utils")
-local TabExtras = CreateTab("Extras")
-local TabTroll = CreateTab("Troll / Server")
-
--- 1. ABA VISUAL
-AddToggle(TabVisual, "ESP Player Highlight", false, function(s) States.EspPlayer = s end)
-AddToggle(TabVisual, "ESP Nome + Distância", false, function(s) States.EspNameDist = s end)
-
-AddButton(TabVisual, "Cor ESP: Vermelho", function() States.EspColor = Color3.fromRGB(255, 0, 0) end)
-AddButton(TabVisual, "Cor ESP: Azul", function() States.EspColor = Color3.fromRGB(0, 100, 255) end)
-AddButton(TabVisual, "Cor ESP: Amarelo", function() States.EspColor = Color3.fromRGB(255, 255, 0) end)
-AddButton(TabVisual, "Cor ESP: Verde", function() States.EspColor = Color3.fromRGB(0, 255, 0) end)
-
-AddToggle(TabVisual, "Hitbox Extender (10x10)", false, function(s) States.Hitbox = s end)
-AddToggle(TabVisual, "Fullbright", false, function(s)
-    States.Fullbright = s
-    Lighting.Ambient = s and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(127, 127, 127)
-end)
-AddInput(TabVisual, "Ajustar FOV (Ex: 100)", function(val)
-    Workspace.CurrentCamera.FieldOfView = tonumber(val) or 70
-end)
-
--- Visual ESP Logic
 RunService.RenderStepped:Connect(function()
     for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character then
-            -- Highlight ESP
-            local hl = p.Character:FindFirstChild("DeltaHL")
-            if States.EspPlayer then
-                if not hl then
-                    hl = Instance.new("Highlight", p.Character)
-                    hl.Name = "DeltaHL"
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            if espActive then
+                local hl = p.Character:FindFirstChild("ESPHighlight") or Instance.new("Highlight", p.Character)
+                hl.Name = "ESPHighlight"
+                hl.FillColor = selectedESPColor
+                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            end
+            
+            if espNamesActive and p.Character:FindFirstChild("Head") then
+                local tag = p.Character.Head:FindFirstChild("ESPNameTag")
+                if not tag then
+                    tag = Instance.new("BillboardGui", p.Character.Head)
+                    tag.Name = "ESPNameTag"
+                    tag.Size = UDim2.new(0, 150, 0, 30)
+                    tag.StudsOffset = Vector3.new(0, 2.5, 0)
+                    tag.AlwaysOnTop = true
+                    
+                    local lbl = Instance.new("TextLabel", tag)
+                    lbl.Name = "TagLabel"
+                    lbl.Size = UDim2.new(1, 0, 1, 0)
+                    lbl.BackgroundTransparency = 1
+                    lbl.TextColor3 = selectedESPColor
+                    lbl.Font = Enum.Font.SourceSansBold
+                    lbl.TextSize = 14
+                    lbl.TextStrokeTransparency = 0
                 end
-                hl.FillColor = States.EspColor
-            elseif hl then hl:Destroy() end
-
-            -- Name + Distance ESP
-            local bb = p.Character:FindFirstChild("DeltaBB")
-            if States.EspNameDist and p.Character:FindFirstChild("Head") then
-                if not bb then
-                    bb = Instance.new("BillboardGui", p.Character.Head)
-                    bb.Name = "DeltaBB"
-                    bb.Size = UDim2.new(0, 100, 0, 30)
-                    bb.StudsOffset = Vector3.new(0, 2, 0)
-                    bb.AlwaysOnTop = true
-                    local txt = Instance.new("TextLabel", bb)
-                    txt.Size = UDim2.new(1, 0, 1, 0)
-                    txt.BackgroundTransparency = 1
-                    txt.TextColor3 = States.EspColor
-                    txt.TextSize = 10
-                    txt.Name = "Txt"
+                
+                local dist = 0
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    dist = math.floor((LocalPlayer.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude)
                 end
-                local dist = math.floor((LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and (LocalPlayer.Character.HumanoidRootPart.Position - p.Character.Head.Position).Magnitude) or 0)
-                bb.Txt.Text = p.Name .. " [" .. dist .. "m]"
-                bb.Txt.TextColor3 = States.EspColor
-            elseif bb then bb:Destroy() end
+                if tag:FindFirstChild("TagLabel") then
+                    tag.TagLabel.Text = p.Name .. " [" .. tostring(dist) .. "m]"
+                    tag.TagLabel.TextColor3 = selectedESPColor
+                end
+            end
 
-            -- Hitbox
-            if States.Hitbox and p.Character:FindFirstChild("HumanoidRootPart") then
-                p.Character.HumanoidRootPart.Size = Vector3.new(10, 10, 10)
-                p.Character.HumanoidRootPart.Transparency = 0.7
-                p.Character.HumanoidRootPart.Color = Color3.fromRGB(255, 0, 0)
-                p.Character.HumanoidRootPart.CanCollide = false
+            if tracersActive then
+                local line = p.Character:FindFirstChild("TracerLine") or Instance.new("SelectionBox", p.Character)
+                line.Name = "TracerLine"
+                line.Adornee = p.Character.HumanoidRootPart
+                line.Color3 = selectedESPColor
             end
         end
     end
 end)
 
--- 2. ABA MÚSICAS
-local ActiveSound = nil
-local SoundID = ""
-AddInput(TabMusic, "ID do Áudio Roblox", function(id) SoundID = id end)
-AddButton(TabMusic, "Tocar Áudio", function()
-    if ActiveSound then ActiveSound:Destroy() end
-    ActiveSound = Instance.new("Sound", SoundService)
-    ActiveSound.SoundId = "rbxassetid://" .. SoundID
-    ActiveSound.Volume = 1
-    ActiveSound:Play()
-end)
-AddButton(TabMusic, "Parar Áudio", function()
-    if ActiveSound then ActiveSound:Stop() ActiveSound:Destroy() end
-end)
-
--- 3. ABA MOVIMENTAÇÃO
-AddInput(TabMove, "WalkSpeed (Velocidade)", function(val)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = tonumber(val) or 16
-    end
-end)
-AddInput(TabMove, "JumpPower (Pulo)", function(val)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.JumpPower = tonumber(val) or 50
+addBtn(visualTab, "Hitbox Extender", function()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            p.Character.HumanoidRootPart.Size = Vector3.new(10, 10, 10)
+            p.Character.HumanoidRootPart.Transparency = 0.7
+            p.Character.HumanoidRootPart.BrickColor = BrickColor.new("Red")
+            p.Character.HumanoidRootPart.CanCollide = false
+        end
     end
 end)
 
-AddToggle(TabMove, "Fly (Voar)", false, function(s)
-    States.Fly = s
-    if s and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local bv = Instance.new("BodyVelocity", LocalPlayer.Character.HumanoidRootPart)
-        bv.Name = "DeltaFlyBV"
-        bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-        local bg = Instance.new("BodyGyro", LocalPlayer.Character.HumanoidRootPart)
-        bg.Name = "DeltaFlyBG"
-        bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+addBtn(visualTab, "Fullbright", function()
+    Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+    Lighting.Brightness = 2
+    Lighting.GlobalShadows = false
+end)
+
+addInput(visualTab, "Mudar FOV (ex: 100)", function(txt)
+    local val = tonumber(txt)
+    if val then
+        Workspace.CurrentCamera.FieldOfView = val
+    end
+end)
+
+-- ========================================================
+-- ABA 2: MÚSICAS (LOCAL / VISUAL)
+-- ========================================================
+local musicTab = createTab("Músicas")
+
+local currentLocalSound = nil
+local soundIDInput = ""
+
+addInput(musicTab, "Digite o ID da Música (Sound ID)", function(txt)
+    soundIDInput = txt
+end)
+
+addBtn(musicTab, "▶ Tocar Música (Só Você Ouve)", function()
+    if currentLocalSound then
+        currentLocalSound:Stop()
+        currentLocalSound:Destroy()
+    end
+    if soundIDInput ~= "" then
+        currentLocalSound = Instance.new("Sound", SoundService)
+        currentLocalSound.SoundId = "rbxassetid://" .. soundIDInput
+        currentLocalSound.Volume = 1
+        currentLocalSound.Looped = true
+        currentLocalSound:Play()
+    end
+end)
+
+addBtn(musicTab, "⏹ Parar Música", function()
+    if currentLocalSound then
+        currentLocalSound:Stop()
+        currentLocalSound:Destroy()
+        currentLocalSound = nil
+    end
+end)
+
+-- ========================================================
+-- ABA 3: MOVIMENTAÇÃO (FLY, INF JUMP & WALL HOP REAL)
+-- ========================================================
+local moveTab = createTab("Movimentação")
+
+addInput(moveTab, "WalkSpeed (ex: 50)", function(txt)
+    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+    if hum then hum.WalkSpeed = tonumber(txt) or 16 end
+end)
+
+addInput(moveTab, "JumpPower (ex: 100)", function(txt)
+    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+    if hum then hum.JumpPower = tonumber(txt) or 50 end
+end)
+
+local flying = false
+local flyBodyVel, flyBodyGyro
+
+addBtn(moveTab, "Toggle Fly (Voar)", function()
+    flying = not flying
+    local char = LocalPlayer.Character
+    if flying and char and char:FindFirstChild("HumanoidRootPart") then
+        local hrp = char.HumanoidRootPart
+        flyBodyVel = Instance.new("BodyVelocity", hrp)
+        flyBodyVel.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+        flyBodyVel.Velocity = Vector3.new(0, 0, 0)
+        
+        flyBodyGyro = Instance.new("BodyGyro", hrp)
+        flyBodyGyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+        flyBodyGyro.CFrame = hrp.CFrame
         
         task.spawn(function()
-            while States.Fly do
-                local cam = Workspace.CurrentCamera.CFrame
-                bv.Velocity = cam.LookVector * 50
-                bg.CFrame = cam
+            while flying and char and char:FindFirstChild("Humanoid") do
+                local camCFrame = Workspace.CurrentCamera.CFrame
+                flyBodyGyro.CFrame = camCFrame
+                flyBodyVel.Velocity = camCFrame.LookVector * 50
                 task.wait()
             end
-            bv:Destroy() bg:Destroy()
+            if flyBodyVel then flyBodyVel:Destroy() end
+            if flyBodyGyro then flyBodyGyro:Destroy() end
         end)
+    else
+        if flyBodyVel then flyBodyVel:Destroy() end
+        if flyBodyGyro then flyBodyGyro:Destroy() end
     end
 end)
 
-AddToggle(TabMove, "Infinite Jump", false, function(s) States.InfJump = s end)
+local infJump = false
+addBtn(moveTab, "Toggle Infinite Jump", function()
+    infJump = not infJump
+end)
+
 UserInputService.JumpRequest:Connect(function()
-    if States.InfJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    if infJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
     end
 end)
 
-AddToggle(TabMove, "Wall Hop (Escalar Parede)", false, function(s) States.WallHop = s end)
+-- WALL HOP REAL (PULAR E ESCALAR PAREDES)
+local wallHopActive = false
+addBtn(moveTab, "🧗 Toggle Wall Hop (Escalar Parede)", function()
+    wallHopActive = not wallHopActive
+end)
+
 UserInputService.JumpRequest:Connect(function()
-    if States.WallHop and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = LocalPlayer.Character.HumanoidRootPart
-        local ray = Ray.new(hrp.Position, hrp.CFrame.LookVector * 3)
-        local part = Workspace:FindPartOnRay(ray, LocalPlayer.Character)
-        if part then
-            LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
-    end
-end)
-
-AddInput(TabMove, "Alterar Gravidade", function(val) Workspace.Gravity = tonumber(val) or 196.2 end)
-
-AddButton(TabMove, "Infinite Stamina", function()
-    for _, v in pairs(game:GetDescendants()) do
-        if v.Name:lower():find("stamina") and v:IsA("ValueBase") then v.Value = 999999 end
-    end
-end)
-
-AddButton(TabMove, "Click Teleport (Adicionar Ferramenta)", function()
-    local Tool = Instance.new("Tool")
-    Tool.Name = "Click TP"
-    Tool.RequiresHandle = false
-    Tool.Parent = LocalPlayer.Backpack
-    Tool.Activated:Connect(function()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = Mouse.Hit + Vector3.new(0, 3, 0)
-        end
-    end)
-end)
-
-AddToggle(TabMove, "NoClip", false, function(s) States.NoClip = s end)
-RunService.Stepped:Connect(function()
-    if States.NoClip and LocalPlayer.Character then
-        for _, p in pairs(LocalPlayer.Character:GetChildren()) do
-            if p:IsA("BasePart") then p.CanCollide = false end
-        end
-    end
-end)
-
--- 4. ABA GRÁFICOS
-AddToggle(TabGraphics, "Tela Esticada (Modo FF)", false, function(s)
-    Workspace.CurrentCamera.FieldOfView = s and 110 or 70
-end)
-
-AddButton(TabGraphics, "Reduzir Lag (Modo Microondas)", function()
-    Lighting.GlobalShadows = false
-    settings().Rendering.QualityLevel = 1
-    for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.Material = Enum.Material.SmoothPlastic
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            v:Destroy()
-        elseif v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Fire") then
-            v.Enabled = false
-        end
-    end
-end)
-
--- Helper para Listar Jogadores
-local function CreatePlayerList(parent, onSelect)
-    local Scroll = Instance.new("ScrollingFrame", parent)
-    Scroll.Size = UDim2.new(1, -10, 0, 120)
-    Scroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    CreateCorner(Scroll, 4)
-    
-    local List = Instance.new("UIListLayout", Scroll)
-    List.SortOrder = Enum.SortOrder.LayoutOrder
-
-    local function Refresh()
-        for _, c in pairs(Scroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer then
-                local Btn = Instance.new("TextButton", Scroll)
-                Btn.Size = UDim2.new(1, 0, 0, 20)
-                Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-                Btn.Text = p.Name
-                Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-                Btn.Font = Enum.Font.SourceSans
-                Btn.TextSize = 11
-                Btn.MouseButton1Click:Connect(function() onSelect(p) end)
+    if wallHopActive and LocalPlayer.Character then
+        local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hrp and hum then
+            local ray = Ray.new(hrp.Position, hrp.CFrame.LookVector * 3)
+            local part, pos = Workspace:FindPartOnRay(ray, LocalPlayer.Character)
+            if part then
+                hum:ChangeState(Enum.HumanoidStateType.Jumping)
             end
         end
     end
-    Refresh()
-    Players.PlayerAdded:Connect(Refresh)
-    Players.PlayerRemoving:Connect(Refresh)
+end)
+
+addInput(moveTab, "Mudar Gravidade (ex: 50)", function(txt)
+    local val = tonumber(txt)
+    if val then
+        Workspace.Gravity = val
+    end
+end)
+
+addBtn(moveTab, "Infinite Stamina", function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Stamina") then
+        LocalPlayer.Character.Stamina.Value = 999999
+    end
+end)
+
+addBtn(moveTab, "Ferramenta Click Teleport", function()
+    local mouse = LocalPlayer:GetMouse()
+    local tool = Instance.new("Tool")
+    tool.RequiresHandle = false
+    tool.Name = "Click Teleport"
+    tool.Activated:Connect(function()
+        local pos = mouse.Hit.p
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
+        end
+    end)
+    tool.Parent = LocalPlayer.Backpack
+end)
+
+local noclip = false
+addBtn(moveTab, "Toggle NoClip", function()
+    noclip = not noclip
+end)
+
+RunService.Stepped:Connect(function()
+    if noclip and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end
+end)
+
+-- ========================================================
+-- ABA 4: GRÁFICOS (NOVA!)
+-- ========================================================
+local gfxTab = createTab("Gráficos")
+
+local stretchedScreen = false
+addBtn(gfxTab, "📱 Toggle Tela Esticada (Modo FF)", function()
+    stretchedScreen = not stretchedScreen
+    local cam = Workspace.CurrentCamera
+    if stretchedScreen then
+        cam.FieldOfView = 110
+    else
+        cam.FieldOfView = 70
+    end
+end)
+
+addBtn(gfxTab, "⚡ Reduzir Lag (Modo Microondas)", function()
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 9e9
+    settings().Rendering.QualityLevel = 1
+    
+    for _, item in pairs(Workspace:GetDescendants()) do
+        if item:IsA("BasePart") then
+            item.Material = Enum.Material.SmoothPlastic
+            item.Reflectance = 0
+        elseif item:IsA("Decal") or item:IsA("Texture") then
+            item:Destroy()
+        elseif item:IsA("ParticleEmitter") or item:IsA("Trail") or item:IsA("Smoke") or item:IsA("Fire") then
+            item.Enabled = false
+        end
+    end
+end)
+
+-- ========================================================
+-- ABA 5: SKIN (CLONAR APARÊNCIA DE JOGADORES)
+-- ========================================================
+local skinTab = createTab("Skin")
+
+local selectedSkinPlayer = nil
+local skinStatusLabel = addLabel(skinTab, "Jogador Selecionado: Nenhum")
+
+local skinListFrame = Instance.new("ScrollingFrame", skinTab)
+skinListFrame.Size = UDim2.new(1, -10, 0, 110)
+skinListFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+skinListFrame.BorderColor3 = Color3.fromRGB(35, 35, 35)
+skinListFrame.ScrollBarThickness = 4
+skinListFrame.ScrollBarImageColor3 = Color3.fromRGB(60, 60, 60)
+
+local skinListLayout = Instance.new("UIListLayout", skinListFrame)
+skinListLayout.Padding = UDim.new(0, 3)
+
+local function refreshSkinPlayerList()
+    for _, child in pairs(skinListFrame:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+    
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            local pBtn = Instance.new("TextButton", skinListFrame)
+            pBtn.Size = UDim2.new(1, -8, 0, 25)
+            pBtn.Text = p.Name
+            pBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            pBtn.BorderColor3 = Color3.fromRGB(40, 40, 40)
+            pBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+            pBtn.Font = Enum.Font.SourceSans
+            pBtn.TextSize = 13
+            
+            pBtn.MouseButton1Click:Connect(function()
+                selectedSkinPlayer = p
+                skinStatusLabel.Text = "Jogador Selecionado: " .. p.Name
+            end)
+        end
+    end
 end
 
--- 5. ABA SKIN
-local SelectedSkinTarget = nil
-CreatePlayerList(TabSkin, function(p) SelectedSkinTarget = p end)
-AddButton(TabSkin, "Clonar Skin do Player Selecionado", function()
-    if SelectedSkinTarget and SelectedSkinTarget.Character and LocalPlayer.Character then
-        for _, item in pairs(LocalPlayer.Character:GetChildren()) do
+addBtn(skinTab, "🔄 Atualizar Lista de Jogadores", function()
+    refreshSkinPlayerList()
+end)
+
+refreshSkinPlayerList()
+
+addBtn(skinTab, "👤 Clonar Skin do Jogador", function()
+    if selectedSkinPlayer and selectedSkinPlayer.Character and LocalPlayer.Character then
+        local myChar = LocalPlayer.Character
+        local targetChar = selectedSkinPlayer.Character
+        
+        for _, item in pairs(myChar:GetChildren()) do
             if item:IsA("Accessory") or item:IsA("Shirt") or item:IsA("Pants") or item:IsA("CharacterMesh") then
                 item:Destroy()
             end
         end
-        for _, item in pairs(SelectedSkinTarget.Character:GetChildren()) do
-            if item:IsA("Accessory") or item:IsA("Shirt") or item:IsA("Pants") or item:IsA("CharacterMesh") then
-                item:Clone().Parent = LocalPlayer.Character
-            end
+        
+        for _, item in pairs(targetChar:GetChildren()) do
+            if item:IsA("Accessory") or item:IrollTab)
+playerListFrame.Size = UDim2.new(1, -10, 0, 100)
+playerListFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+playerListFrame.BorderColor3 = Color3.fromRGB(35, 35, 35)
+playerListFrame.ScrollBarThickness = 4
+playerListFrame.ScrollBarImageColor3 = Color3.fromRGB(60, 60, 60)
+
+local playerListLayout = Instance.new("UIListLayout", playerListFrame)
+playerListLayout.Padding = UDim.new(0, 3)
+
+local function refreshPlayerList()
+    for _, child in pairs(playerListFrame:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
         end
     end
-end)
-
--- 6. ABA FARM / UTILS
-AddToggle(TabUtils, "Auto-Clicker", false, function(s) States.AutoClicker = s end)
-task.spawn(function()
-    while true do
-        if States.AutoClicker then
-            VirtualUser:Button1Down(Vector2.new(0,0))
-            task.wait(0.01)
-            VirtualUser:Button1Up(Vector2.new(0,0))
-        end
-        task.wait(0.05)
-    end
-end)
-
-AddToggle(TabUtils, "Anti-AFK", false, function(s) States.AntiAFK = s end)
-LocalPlayer.Idled:Connect(function()
-    if States.AntiAFK then
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new())
-    end
-end)
-
--- 7. ABA EXTRAS
-AddButton(TabExtras, "Ativar Auto-Rejoin em Quedas", function()
-    local gui = CoreGui:FindFirstChild("RobloxPromptGui")
-    if gui then
-        gui.DescendantAdded:Connect(function(child)
-            if child.Name == "ErrorPrompt" then
-                TeleportService:Teleport(game.PlaceId, LocalPlayer)
-            end
-        end)
-    end
-end)
-
-AddToggle(TabExtras, "Anti-Touch Damage (Lava Immunity)", false, function(s)
-    States.LavaImmunity = s
-    if s and LocalPlayer.Character then
-        for _, p in pairs(LocalPlayer.Character:GetChildren()) do
-            if p:IsA("BasePart") then
-                p.Touched:Connect(function() end)
-            end
-        end
-    end
-end)
-
-AddButton(TabExtras, "Noclip de Câmera", function()
-    LocalPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Invisicam
-end)
-
-AddButton(TabExtras, "Zoom Infinito", function()
-    LocalPlayer.CameraMaxZoomDistance = 999999
-end)
-
-AddButton(TabExtras, "Destruir GUI", function()
-    ScreenGui:Destroy()
-end)
-
--- 8. ABA TROLL / SERVER
-CreatePlayerList(TabTroll, function(p) TargetPlayer = p end)
-
-AddToggle(TabTroll, "Spectate (Especionar)", false, function(s)
-    if s and TargetPlayer and TargetPlayer.Character then
-        Workspace.CurrentCamera.CameraSubject = TargetPlayer.Character:FindFirstChildOfClass("Humanoid")
-    else
-        if LocalPlayer.Character then
-            Workspace.CurrentCamera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
     
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            local pBtn = Instance.new("TextButton", playerListFrame)
+            pBtn.Size = UDim2.new(1, -8, 0, 25)
+            pBtn.Text = p.Name
+            pBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            pBtn.BorderColor3 = Color3.fromRGB(40, 40, 40)
+            pBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+            pBtn.Font = Enum.Font.SourceSans
+            pBtn.TextSize = 13
+            
+            pBtn.MouseButton1Click:Connect(function()
+                selectedPlayerName = p.Name
+                statusLabel.Text = "Jogador Selecionado: " .. p.Name
+            end)
+        end
+    end
+end
+
+addBtn(trollTab, "🔄 Atualizar Lista de Jogadores", function()
+    refreshPlayerList()
+end)
+
+refreshPlayerList()
+
+addBtn(trollTab, "🚀 Teleportar até o Jogador", function()
+    if selectedPlayerName then
+        local target = Players:FindFirstChild(selectedPlayerName)
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
+            end
+        end
+    end
+end)
+
+local spectating = false
+addBtn(trollTab, "👁️ Assistir / Espectar Jogador", function()
+    if selectedPlayerName then
+        local target = Players:FindFirstChild(selectedPlayerName)
+        if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+            spectating = not spectating
+            if spectating then
+                Workspace.CurrentCamera.CameraSubject = target.Character.Humanoid
+            else
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                    Workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
+                end
+            end
+        end
+    end
+end)
+
+addBtn(trollTab, "❌ Parar de Espectar (Voltar Câmera)", function()
+    spectating = false
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        Workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
+    end
+end)
+
+addBtn(trollTab, "Bring All (Puxar Ferramentas)", function()
+    for _, item in pairs(Workspace:GetChildren()) do
+        if item:IsA("Tool") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid:EquipTool(item)
+        end
+    end
+end)
+
+addBtn(trollTab, "Fling Jogadores Próximos", function()
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        local bAv = Instance.new("BodyAngularVelocity", char.HumanoidRootPart)
+        bAv.MaxTorque = Vector3.new(0, math.huge, 0)
+        bAv.AngularVelocity = Vector3.new(0, 99999, 0)
+        task.wait(2)
+        bAv:Destroy()
+    end
+end)
+
+addBtn(trollTab, "Invisibilidade (Visual)", function()
+    if LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then
+                part.Transparency = 1
+            end
+        end
+    end
+end)
+
+-- ========================================================
+-- NOTIFICAÇÃO DE CARREGAMENTO
+-- ========================================================
+pcall(function()
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Delta Roblox",
+        Text = "Script Executado com Sucesso!",
+        Duration = 5
+    })
+end)
